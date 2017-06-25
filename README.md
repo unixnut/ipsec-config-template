@@ -1,4 +1,6 @@
-== Introduction ==
+# IPsec config template
+
+## Introduction
 
 Implements a full PKI solution for IPsec VPNs, using tunnel mode and authorised
 (and revokable) certificates.  Currently only supports Linux/Unix clients.
@@ -14,14 +16,14 @@ The config files interpret 'left' as local (initiator) and 'right' as remote
 and 'right' as responder, which means that regardless of whether you're looking
 at the client or server config, 'left' and 'right' mean the same thing.
 
-== CA operation ==
+## CA operation
 
 ***TBA***
 
 See `Makefile` for some basic instructions.
 **Beware**: by default, client keys have no passphrase.
 
-== Server setup ==
+## Server setup
 
 **Warning**: This will overwrite your existing `/etc/ipsec.conf` and
 `/etc/ipsec.secrets` files.
@@ -30,7 +32,7 @@ See `Makefile` for some basic instructions.
     sudo tar xf /tmp/server.tar.gz -C /etc
     sudo service ipsec restart
 
-== Client setup ==
+## Client setup
 
 The `tar` command extracts some .snippet files that are not used directly;
 instead, when running the sudoedit commands, paste in the contents of the
@@ -42,7 +44,8 @@ respective .snippet file.
     sudoedit /etc/ipsec.secrets
     sudo service ipsec restart
 
-== Remote subnet access ==
+## Remote subnet access
+
 This is the "`left|rightsubnet = <ip subnet>[[<proto/port>]][,...]`"
 [config item](https://wiki.strongswan.org/projects/strongswan/wiki/ConnSection#leftright-End-Parameters).
 
@@ -52,6 +55,7 @@ server config defines `leftsubnet` *and* the client specifies `rightsubnet`, the
 the client will be able to access the server's entire subnet.  If neither end
 (or just the server) defines it, remote subnet access doesn't work.
 
-== TO-DO ==
+## TO-DO
+
 Generate server/ipsec.conf from server/_ipsec_template.conf to allow `leftca`
 and `leftsubnet` to be set automatically.
