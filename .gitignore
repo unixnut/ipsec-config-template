@@ -1,0 +1,13 @@
+# file types
+*.pyc
+\#*\#
+.*.sw?
+.swp
+## *.desktop
+*.old
+*.bak
+.~lock.*#
+.*_stamp
+.*-stamp
+# dirs
+.virtualenv
