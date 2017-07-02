@@ -176,9 +176,10 @@ nsComment			= "OpenSSL Generated Certificate"
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid,issuer:always
 
-# This stuff is for subjectAltName and issuerAltname.
-# Import the email address.
-# subjectAltName=email:copy
+# See https://wiki.strongswan.org/projects/strongswan/wiki/Win7CertReq#Client-certificates 
+# commonName has IOD 2.5.4.3
+# Not sure if this is supported: it comes up as "            X509v3 Subject Alternative Name: othername:<unsupported>" in the openssl output
+subjectAltName=otherName:commonName;UTF8:$ENV::CN
 
 # Copy subject details
 # issuerAltName=issuer:copy
@@ -190,6 +191,11 @@ authorityKeyIdentifier=keyid,issuer:always
 #nsCaPolicyUrl
 #nsSslServerName
 
+# See https://wiki.strongswan.org/projects/strongswan/wiki/Win7CertReq
+# "TLS Web Server Authentication" EKU
+extendedKeyUsage = clientAuth
+
+
 [ server ]
 
 # JY ADDED -- Make a cert with nsCertType set to "server"
@@ -198,6 +204,11 @@ nsCertType			= server
 nsComment			= "OpenSSL Generated Server Certificate"
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid,issuer:always
+
+# See https://wiki.strongswan.org/projects/strongswan/wiki/Win7CertReq
+# "TLS Web Server Authentication" and "IP Security IKE Intermediate" EKUs
+extendedKeyUsage = serverAuth, 1.3.6.1.5.5.8.2.2
+subjectAltName   = DNS:$ENV::SERVER_FQDN
 
 [ v3_req ]
 

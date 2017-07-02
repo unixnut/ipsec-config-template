@@ -55,7 +55,16 @@ KEY_CONFIG = openssl.cnf
 KEY_DIR = keys
 # These might be overriden by an environment variable
 KEY_SIZE ?= 2048
-CN ?=
+ifeq ($(origin CLIENT), undefined)
+  ## CN ?= $(SERVER_ID)
+  CN ?=
+else
+  ifeq ($(origin CN), undefined)
+    $(warning CN not specified on command line.  If commonName is set differently)
+    $(warning to "$(CLIENT)", MS-Windows will not be allowed to connect)
+    CN = $(CLIENT)
+  endif
+endif
 
 # Settings that depend on whether certain environment variables are set
 ifeq ($(origin SERVER_SUBNET), undefined)
