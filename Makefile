@@ -130,11 +130,13 @@ clients/$(CLIENT):
 clients/.$(CLIENT)_cert-link-stamp: $(KEY_DIR)/$(CLIENT).crt $(KEY_DIR)/$(CLIENT).key | clients/$(CLIENT)/certs clients/$(CLIENT)/private clients/$(CLIENT)/cacerts
 	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).crt clients/$(CLIENT)/certs/
 	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).key clients/$(CLIENT)/private/
-	ln -s --force ../../../$(KEY_DIR)/ca.crt clients/$(CLIENT)/cacerts/
+	ln -s --force ../../../$(KEY_DIR)/ca.crt "clients/$(CLIENT)/cacerts/$(CONF_NAME).crt"
 	touch $@
 
-clients/$(CLIENT)/certs clients/$(CLIENT)/private clients/$(CLIENT)/cacerts:
+clients/$(CLIENT)/certs clients/$(CLIENT)/cacerts:
 	mkdir -p $@
+clients/$(CLIENT)/private:
+	install -d -m 700 $@
 
 .PHONY: conf_link
 conf_link: clients/.$(CLIENT)_conf-link-stamp
@@ -240,7 +242,8 @@ $(SERVER_ID)/ipsec.secrets: $(KEY_DIR)/$(SERVER_ID).crt
 	touch $@
 
 $(SERVER_ID)/ipsec.d:
-	mkdir -p $@ $@/certs $@/private $@/cacerts $@/crls
+	mkdir -p $@ $@/certs $@/cacerts $@/crls
+	install -d -m 700 $@/private
 
 
 # == CA ==

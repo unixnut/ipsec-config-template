@@ -9,6 +9,7 @@ export KEY_ORG=""
 ## export KEY_DEPT=
 
 export SERVER_FQDN=x.y.z
+## export SERVER_SUBNET=
 
 # If changing this, edit server/staff.conf
 ## export KEY_SIZE=2048
