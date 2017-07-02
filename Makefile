@@ -197,7 +197,7 @@ $(KEY_DIR)/$(SERVER_ID).key $(KEY_DIR)/$(SERVER_ID).csr: $(KEY_DIR)/ca.key
 # (avoids having to generate the CRL every time a cert is revoked,
 # but does take the safe option of making $(SERVER_ID).tar.gz transitively dependent
 # on $(KEY_DIR)/index.txt)
-$(SERVER_ID)/ipsec.d/crls/banned_certs.crl: $(KEY_DIR)/ca.key $(KEY_DIR)/index.txt
+$(SERVER_ID)/ipsec.d/crls/banned_certs.crl: $(KEY_DIR)/ca.key $(KEY_DIR)/index.txt | $(SERVER_ID)/ipsec.d
 	openssl ca -config $(KEY_CONFIG) \
 	  -gencrl -out $@
 
