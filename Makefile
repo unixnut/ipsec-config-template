@@ -42,8 +42,18 @@ endif
 # == Setup ==
 .EXPORT_ALL_VARIABLES:
 
-# must be a single word
-CLIENT = someone
+ifeq ($(origin CLIENT), undefined)
+  ## CN = $(SERVER_ID)
+  CN =
+  # must be a single word
+  CLIENT = someone
+else
+  ifeq ($(origin CN), undefined)
+    $(warning CN not specified on command line.  If commonName is set differently)
+    $(warning to "$(CLIENT)", MS-Windows will not be allowed to connect)
+    CN = $(CLIENT)
+  endif
+endif
 # don't use a passphrase
 CLIENT_REQ_ARGS = -nodes
 
@@ -56,18 +66,6 @@ DEST = /tmp/keys
 
 KEY_CONFIG = openssl.cnf
 KEY_DIR = keys
-# These might be overriden by an environment variable
-KEY_SIZE ?= 2048
-ifeq ($(origin CLIENT), undefined)
-  ## CN ?= $(SERVER_ID)
-  CN ?=
-else
-  ifeq ($(origin CN), undefined)
-    $(warning CN not specified on command line.  If commonName is set differently)
-    $(warning to "$(CLIENT)", MS-Windows will not be allowed to connect)
-    CN = $(CLIENT)
-  endif
-endif
 
 # Settings that depend on whether certain environment variables are set
 ifeq ($(origin SERVER_SUBNET), undefined)
@@ -76,6 +74,8 @@ else
   SERVER_SUBNET_SUBST = -e '/{{SERVER_SUBNET}}/ { s@@$(SERVER_SUBNET)@ ; s/\#\# // }'
 endif
 
+# These might be overriden by an environment variable
+KEY_SIZE ?= 2048
 ifeq ($(origin KEY_DEPT), undefined)
   CONF_NAME = $(KEY_ORG)
   KEY_DEPT =
