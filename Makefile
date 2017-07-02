@@ -17,6 +17,7 @@
 #   KEY_CONFIG (optional)
 #   REQ_ARGS (optional; can be used to pass "-subj 'arg'" -- NOTE QUOTES)
 #   CA_ARGS (optional; can be used to pass "-batch")
+#   CA_REQ_ARGS= (when building a ca; used to require a passphrase)
 #
 # The following environment variables may/must be present (see "vars" file):
 #   KEY_ORG (mandatory)
@@ -48,6 +49,8 @@ CLIENT_REQ_ARGS = -nodes
 
 SERVER = server
 SERVER_ID = $(SERVER)
+
+CA_REQ_ARGS=-nodes
 
 DEST = /tmp/keys
 
@@ -247,7 +250,7 @@ $(KEY_DIR)/ca.key: | $(KEY_DIR)/index.txt $(KEY_DIR)/serial
 	@echo Creating CA key and certificate
 	openssl req -config $(KEY_CONFIG) \
 	  -new -x509 -days 3650 -out $(KEY_DIR)/ca.crt \
-	  -newkey rsa:$(KEY_SIZE) -keyout $(KEY_DIR)/ca.key -nodes
+	  -newkey rsa:$(KEY_SIZE) -keyout $(KEY_DIR)/ca.key $(CA_REQ_ARGS)
 	chmod 0600 $(KEY_DIR)/ca.key
 
 $(KEY_DIR)/index.txt: | $(KEY_DIR)

@@ -1,11 +1,12 @@
-echo "WARNING: Don't forget change the \"push\" and \"server\" statements"
-echo "in server/staff.conf"
+echo "WARNING: Don't forget change the \"leftca\" and \"rightca\" statements"
+echo "(and \"leftsubnet\" and \"rightsourceip\" if required) in server/ipsec.conf"
 echo
 
 # These are the default values for fields
 # which will be placed in the certificate.
 # Don't leave any of these fields blank.
 export KEY_ORG=""
+## export KEY_DEPT=
 
 export SERVER_FQDN=x.y.z
 
