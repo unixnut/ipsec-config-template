@@ -11,6 +11,7 @@
 #   CLIENT (if building a client; mandatory)
 #   CLIENT_REQ_ARGS= (if building a client; used to require a passphrase)
 #   SERVER_ID (if building a server; optional)
+#   KEY_NAME (optional; If not using shared keys between connections, override this; default is CLIENT)
 #   KEY_DEPT (optional; specifies organizationalUnitName and alters config file name)
 #   CN (optional; specifies commonName)
 #   KEY_DIR (optional)
@@ -86,6 +87,7 @@ else
   CONF_NAME = $(KEY_DEPT)
 endif
 
+KEY_NAME = $(CLIENT)
 
 
 CLIENT_DEPS = clients/$(CLIENT).conf clients/.$(CLIENT)_stamp
@@ -132,7 +134,7 @@ clients/$(CLIENT):
 
 clients/.$(CLIENT)_cert-link-stamp: $(KEY_DIR)/$(CLIENT).crt $(KEY_DIR)/$(CLIENT).key | clients/$(CLIENT)/certs clients/$(CLIENT)/private clients/$(CLIENT)/cacerts
 	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).crt "clients/$(CLIENT)/certs/$(CONF_NAME).crt"
-	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).key clients/$(CLIENT)/private/
+	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).key "clients/$(CLIENT)/private/$(KEY_NAME).key"
 	ln -s --force ../../../$(KEY_DIR)/ca.crt "clients/$(CLIENT)/cacerts/$(CONF_NAME).crt"
 	touch $@
 
@@ -156,7 +158,7 @@ $(KEY_DIR)/$(CLIENT).crt: $(KEY_DIR)/$(CLIENT).csr $(KEY_DIR)/ca.crt $(KEY_DIR)/
 	  -in $(KEY_DIR)/$(CLIENT).csr -out $(KEY_DIR)/$(CLIENT).crt
 
 # -nodes isn't specified here because it might be in $(CLIENT_REQ_ARGS)
-$(KEY_DIR)/$(CLIENT).key $(KEY_DIR)/$(CLIENT).csr: $(KEY_DIR)/ca.key
+$(KEY_DIR)/$(CLIENT).key $(KEY_DIR)/$(CLIENT).csr: | $(KEY_DIR)/ca.key
 	openssl req -config $(KEY_CONFIG) $(REQ_ARGS) $(CLIENT_REQ_ARGS) \
 	  -new -out $(KEY_DIR)/$(CLIENT).csr \
 	  -newkey rsa:$(KEY_SIZE) -keyout $(KEY_DIR)/$(CLIENT).key
@@ -165,7 +167,7 @@ $(KEY_DIR)/$(CLIENT).key $(KEY_DIR)/$(CLIENT).csr: $(KEY_DIR)/ca.key
 # This creates a file with spaces in the name, which is therefore no use as a target
 clients/.$(CLIENT)_secrets-stamp: $(KEY_DIR)/$(CLIENT).crt clients/.$(CLIENT)_conf-link-stamp | clients/$(CLIENT)/secrets.d
 	openssl x509 -subject -noout -in "$(KEY_DIR)/$(CLIENT).crt" | \
-	 sed -e 's/subject= \(.*\)/"\1" : RSA "$(CLIENT).key"/' \
+	 sed -e 's/subject= \(.*\)/"\1" : RSA "$(KEY_NAME).key"/' \
 	   > "clients/$(CLIENT)/secrets.d/$(CONF_NAME).secrets"
 	touch $@
 
