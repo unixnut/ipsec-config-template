@@ -128,8 +128,8 @@ clients/$(CLIENT):
 	mkdir -p $@
 
 clients/.$(CLIENT)_cert-link-stamp: $(KEY_DIR)/$(CLIENT).crt $(KEY_DIR)/$(CLIENT).key | clients/$(CLIENT)/certs clients/$(CLIENT)/private clients/$(CLIENT)/cacerts
-	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).crt clients/$(CLIENT)/certs/
-	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).key clients/$(CLIENT)/private/
+	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).crt "clients/$(CLIENT)/certs/$(CONF_NAME).crt"
+	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).key "clients/$(CLIENT)/private/$(CONF_NAME).crt"
 	ln -s --force ../../../$(KEY_DIR)/ca.crt "clients/$(CLIENT)/cacerts/$(CONF_NAME).crt"
 	touch $@
 
@@ -160,9 +160,9 @@ $(KEY_DIR)/$(CLIENT).key $(KEY_DIR)/$(CLIENT).csr: $(KEY_DIR)/ca.key
 	chmod 0600 $(KEY_DIR)/$(CLIENT).key
 
 # This creates a file with spaces in the name, which is therefore no use as a target
-clients/.$(CLIENT)_secrets-stamp: $(KEY_DIR)/$(CLIENT).crt | clients/$(CLIENT)/secrets.d
+clients/.$(CLIENT)_secrets-stamp: $(KEY_DIR)/$(CLIENT).crt clients/.$(CLIENT)_conf-link-stamp | clients/$(CLIENT)/secrets.d
 	openssl x509 -subject -noout -in "$^" | \
-	 sed -e 's/subject= \(.*\)/"\1" : RSA "$(CLIENT).key"/' \
+	 sed -e 's/subject= \(.*\)/"\1" : RSA "$(CONF_NAME).key"/' \
 	   > "clients/$(CLIENT)/secrets.d/$(CONF_NAME).secrets"
 	touch $@
 
