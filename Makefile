@@ -129,7 +129,7 @@ clients/$(CLIENT):
 
 clients/.$(CLIENT)_cert-link-stamp: $(KEY_DIR)/$(CLIENT).crt $(KEY_DIR)/$(CLIENT).key | clients/$(CLIENT)/certs clients/$(CLIENT)/private clients/$(CLIENT)/cacerts
 	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).crt "clients/$(CLIENT)/certs/$(CONF_NAME).crt"
-	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).key "clients/$(CLIENT)/private/$(CONF_NAME).crt"
+	ln -s --force ../../../$(KEY_DIR)/$(CLIENT).key "clients/$(CLIENT)/private/$(CONF_NAME).key"
 	ln -s --force ../../../$(KEY_DIR)/ca.crt "clients/$(CLIENT)/cacerts/$(CONF_NAME).crt"
 	touch $@
 
