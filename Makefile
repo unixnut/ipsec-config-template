@@ -161,13 +161,24 @@ $(KEY_DIR)/$(CLIENT).key $(KEY_DIR)/$(CLIENT).csr: $(KEY_DIR)/ca.key
 
 # This creates a file with spaces in the name, which is therefore no use as a target
 clients/.$(CLIENT)_secrets-stamp: $(KEY_DIR)/$(CLIENT).crt clients/.$(CLIENT)_conf-link-stamp | clients/$(CLIENT)/secrets.d
-	openssl x509 -subject -noout -in "$^" | \
+	openssl x509 -subject -noout -in "$(KEY_DIR)/$(CLIENT).crt" | \
 	 sed -e 's/subject= \(.*\)/"\1" : RSA "$(CONF_NAME).key"/' \
 	   > "clients/$(CLIENT)/secrets.d/$(CONF_NAME).secrets"
 	touch $@
 
 clients/$(CLIENT)/secrets.d:
 	mkdir -p $@
+
+# -- distribution archive --
+.phony: ctarball
+# this target creates a tarball (no symlinks) for distribution to a client machine
+ctarball: strongSwan_$(CLIENT).tar.gz
+strongSwan_$(CLIENT).tar.gz: $(CLIENT_DEPS) ipsec.conf.snippet ipsec.secrets.snippet
+	tar czhvf $@ \
+	 ipsec.conf.snippet ipsec.secrets.snippet \
+	 -C clients/$(CLIENT) \
+	 certs private cacerts \
+	 "conf.d/$(CONF_NAME).conf" "secrets.d/$(CONF_NAME).secrets"
 
 # -- util targets --
 # Hint: use with CLIENT=\* (but be prepared for warnings)
@@ -203,33 +214,11 @@ $(SERVER_ID)/ipsec.d/crls/banned_certs.crl: $(KEY_DIR)/ca.key $(KEY_DIR)/index.t
 	openssl ca -config $(KEY_CONFIG) \
 	  -gencrl -out $@
 
-
-# == distribution archives ==
-.phony: tarball ctarball
-# this target creates a tarball (no symlinks) for distribution to a client machine
-ctarball: strongSwan_$(CLIENT).tar.gz
-strongSwan_$(CLIENT).tar.gz: $(CLIENT_DEPS) ipsec.conf.snippet ipsec.secrets.snippet
-	tar czhvf $@ \
-	 ipsec.conf.snippet ipsec.secrets.snippet \
-	 -C clients/$(CLIENT) \
-	 certs private cacerts \
-	 "conf.d/$(CONF_NAME).conf" "secrets.d/$(CONF_NAME).secrets"
-
 ipsec.conf.snippet:
 	echo "include /etc/ipsec.d/conf.d/*.conf" > $@
 
 ipsec.secrets.snippet:
 	echo "include /etc/ipsec.d/secrets.d/*.secrets" > $@
-
-tarball: $(SERVER_ID).tar.gz
-# to be extracted into /etc
-$(SERVER_ID).tar.gz: $(SERVER_ID)/ipsec.conf $(SERVER_ID)/ipsec.secrets $(SERVER_ID)/ipsec.d/crls/banned_certs.crl .$(SERVER_ID)_cert-link-stamp
-	tar czhvf $@ \
-	 -C $(SERVER_ID) \
-	 ipsec.conf ipsec.secrets \
-	 ipsec.d/cacerts/ca.crt ipsec.d/certs/$(SERVER_ID).crt \
-	 ipsec.d/private/$(SERVER_ID).key ipsec.d/crls/banned_certs.crl \
-	 scripts/routing_on.up
 
 $(SERVER_ID)/ipsec.secrets: $(KEY_DIR)/$(SERVER_ID).crt
 	openssl x509 -subject -noout -in "$^" | \
@@ -244,6 +233,18 @@ $(SERVER_ID)/ipsec.secrets: $(KEY_DIR)/$(SERVER_ID).crt
 $(SERVER_ID)/ipsec.d:
 	mkdir -p $@ $@/certs $@/cacerts $@/crls
 	install -d -m 700 $@/private
+
+# -- distribution archive --
+.phony: tarball
+tarball: $(SERVER_ID).tar.gz
+# to be extracted into /etc
+$(SERVER_ID).tar.gz: $(SERVER_ID)/ipsec.conf $(SERVER_ID)/ipsec.secrets $(SERVER_ID)/ipsec.d/crls/banned_certs.crl .$(SERVER_ID)_cert-link-stamp
+	tar czhvf $@ \
+	 -C $(SERVER_ID) \
+	 ipsec.conf ipsec.secrets \
+	 ipsec.d/cacerts/ca.crt ipsec.d/certs/$(SERVER_ID).crt \
+	 ipsec.d/private/$(SERVER_ID).key ipsec.d/crls/banned_certs.crl \
+	 scripts/routing_on.up
 
 
 # == CA ==
